@@ -5,15 +5,15 @@ import { ArrowRight, Crosshair, Lightning, ShieldCheck, CaretLeft, CaretRight } 
 
 const SLIDES = [
   {
-    bg: '/images/slider_headset.png',
+    bg: '/images/carousel/наушники.png',
     text: 'Превосходное\nкачество сборки и\nисключительный\nкомфорт',
   },
   {
-    bg: '/images/slider_controller.png',
+    bg: '/images/carousel/клава.png',
     text: 'Легкие стики\nмалый вес\nсиликон высокого\nкачества -\nбудущее внутри\nгеймпада',
   },
   {
-    bg: '/images/slider_keyboard.png',
+    bg: '/images/carousel/геймпад.png',
     text: 'Матовые клавиши\nбесшумные\nмеханические\nкомпоненты -\nидеал для побед',
   },
 ];
@@ -58,12 +58,12 @@ export default function Home() {
 
   return (
     <div className="flex flex-col relative w-full bg-[#050505] min-h-screen font-sans overflow-x-hidden" ref={containerRef}>
-      
+
       {/* 1. HERO SECTION */}
       <section className="relative min-h-[100dvh] flex items-center justify-start bg-[#050505] px-8 md:px-20 pt-20">
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10 w-full" />
-        
-        <motion.video 
+
+        <motion.video
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 2, ease: "easeOut" }}
@@ -75,11 +75,11 @@ export default function Home() {
           className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-3/4 lg:w-2/3 max-w-6xl h-auto object-cover opacity-60 pointer-events-none mix-blend-lighten"
         />
 
-        <motion.div 
+        <motion.div
           style={{ y: y1 }}
           className="relative z-20 max-w-2xl flex flex-col pt-10"
         >
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -88,17 +88,17 @@ export default function Home() {
             <div className="h-[1px] w-12 bg-gray-500"></div>
             <span className="uppercase tracking-[0.2em] text-[10px] font-bold text-gray-400">DIGITAL TECH GAMING</span>
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 uppercase leading-[0.9]"
           >
-            ИГРАЙ.<br/>ДОМИНИРУЙ.
+            ИГРАЙ.<br />ДОМИНИРУЙ.
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
@@ -106,8 +106,8 @@ export default function Home() {
           >
             Премиальные периферийные устройства. Высокоточные сенсоры, смазанные переключатели с завода и воплощенный дизайн.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
@@ -122,10 +122,10 @@ export default function Home() {
 
       {/* 2. SLIDING CAROUSEL SECTION */}
       <section className="relative z-20 w-full py-12 md:py-24 flex items-center justify-center min-h-[600px] md:min-h-[800px] bg-[#050505]">
-        
+
         {/* Left Arrow (Outside) */}
-        <button 
-          onClick={() => paginate(-1)} 
+        <button
+          onClick={() => paginate(-1)}
           className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors z-30"
         >
           <CaretLeft size={48} weight="light" />
@@ -147,16 +147,16 @@ export default function Home() {
               }}
               className="absolute inset-0 w-full h-full"
             >
-              <img 
-                src={slide.bg} 
-                alt="Product Slide" 
+              <img
+                src={slide.bg}
+                alt="Product Slide"
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
               />
-              
+
               <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/10 to-transparent pointer-events-none" />
 
               <div className="relative z-10 w-full h-full flex flex-col justify-center px-8 md:px-24">
-                <h2 
+                <h2
                   className="text-white mb-10 leading-[1.3] whitespace-pre-line drop-shadow-xl font-medium tracking-wide"
                   style={{ fontFamily: "'Benzin', sans-serif", fontSize: '36px' }}
                 >
@@ -182,9 +182,8 @@ export default function Home() {
                     setDirection(idx > current ? 1 : -1);
                     setPage(Math.floor(page / SLIDES.length) * SLIDES.length + idx);
                   }}
-                  className={`w-1.5 rounded-full transition-all duration-300 ${
-                    isActive ? "bg-blue-500 h-5" : "bg-gray-500 h-3 hover:bg-gray-300"
-                  }`}
+                  className={`w-1.5 rounded-full transition-all duration-300 ${isActive ? "bg-blue-500 h-5" : "bg-gray-500 h-3 hover:bg-gray-300"
+                    }`}
                 />
               );
             })}
@@ -192,8 +191,8 @@ export default function Home() {
         </div>
 
         {/* Right Arrow (Outside) */}
-        <button 
-          onClick={() => paginate(1)} 
+        <button
+          onClick={() => paginate(1)}
           className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors z-30"
         >
           <CaretRight size={48} weight="light" />
@@ -203,46 +202,46 @@ export default function Home() {
 
       {/* 3. QUALITY / FEATURES SECTION */}
       <section className="relative z-20 px-8 md:px-20 py-24 max-w-[1600px] mx-auto w-full">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-4xl md:text-5xl font-bold tracking-tighter text-white mb-16 uppercase leading-tight"
         >
-          ТОЛЬКО<br/>КАЧЕСТВО
+          ТОЛЬКО<br />КАЧЕСТВО
         </motion.h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
             className="bg-[#0a0a0a] p-10 flex flex-col h-[380px] justify-between border border-transparent shadow-lg"
           >
             <Crosshair size={32} className="text-white mb-auto" weight="regular" />
             <div>
-               <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">ХИРУРГИЧЕСКАЯ ТОЧНОСТЬ</h3>
-               <p className="text-gray-500 text-sm leading-relaxed">Оптические сенсоры последнего поколения гарантируют регистрацию каждого миллиметра.</p>
+              <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">ХИРУРГИЧЕСКАЯ ТОЧНОСТЬ</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Оптические сенсоры последнего поколения гарантируют регистрацию каждого миллиметра.</p>
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
             className="bg-[#0a0a0a] p-10 flex flex-col h-[380px] justify-between border border-transparent shadow-lg"
           >
             <Lightning size={32} className="text-white mb-auto" weight="regular" />
             <div>
-               <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">МОЛНИЕНОСНЫЙ ОТКЛИК</h3>
-               <p className="text-gray-500 text-sm leading-relaxed">Собственные переключатели с ходом до срабатывания в 1мм обеспечивают минимально возможную задержку.</p>
+              <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">МОЛНИЕНОСНЫЙ ОТКЛИК</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Собственные переключатели с ходом до срабатывания в 1мм обеспечивают минимально возможную задержку.</p>
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
             className="bg-[#0a0a0a] p-10 flex flex-col h-[380px] justify-between border border-transparent shadow-lg"
           >
             <ShieldCheck size={32} className="text-white mb-auto" weight="regular" />
             <div>
-               <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">МОНОЛИТНАЯ КОНСТРУКЦИЯ</h3>
-               <p className="text-gray-500 text-sm leading-relaxed">Толстый пластик, шумоизоляция на уровне корпуса и смазанные с завода стабилизаторы.</p>
+              <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">МОНОЛИТНАЯ КОНСТРУКЦИЯ</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Толстый пластик, шумоизоляция на уровне корпуса и смазанные с завода стабилизаторы.</p>
             </div>
           </motion.div>
         </div>
