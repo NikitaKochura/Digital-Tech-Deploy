@@ -5,15 +5,15 @@ import { ArrowRight, Crosshair, Lightning, ShieldCheck, CaretLeft, CaretRight } 
 
 const SLIDES = [
   {
-    bg: '/images/carousel/наушники.png',
+    bg: '/images/carousel/Уши.png',
     text: 'Превосходное\nкачество сборки и\nисключительный\nкомфорт',
   },
   {
-    bg: '/images/carousel/клава.png',
+    bg: '/images/carousel/Клава.png',
     text: 'Легкие стики\nмалый вес\nсиликон высокого\nкачества -\nбудущее внутри\nгеймпада',
   },
   {
-    bg: '/images/carousel/геймпад.png',
+    bg: '/images/carousel/Геймпад.png',
     text: 'Матовые клавиши\nбесшумные\nмеханические\nкомпоненты -\nидеал для побед',
   },
 ];
