@@ -12,10 +12,26 @@ export default function Home() {
     <div className="flex flex-col relative w-full bg-[#050505] min-h-screen font-sans" ref={containerRef}>
       
       {/* 1. HERO SECTION */}
-      <section className="relative min-h-[90vh] flex flex-col md:flex-row items-center justify-between px-8 md:px-20 pt-32 overflow-hidden">
+      <section className="relative min-h-[100dvh] flex items-center justify-start bg-[#050505] px-8 md:px-20 pt-20">
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10 w-full" />
+        
+        {/* Hero Video Background */}
+        <motion.video 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          src="/hero.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-3/4 lg:w-2/3 max-w-6xl h-auto object-cover opacity-60 pointer-events-none mix-blend-lighten"
+        />
+
         <motion.div 
           style={{ y: y1 }}
-          className="relative z-20 w-full md:w-1/2 flex flex-col pt-10 md:pr-10"
+          className="relative z-20 max-w-2xl flex flex-col pt-10"
         >
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -56,19 +72,6 @@ export default function Home() {
             </Link>
           </motion.div>
         </motion.div>
-
-        {/* Hero Video Background */}
-        <motion.video 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
-          src="/hero.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-3/4 lg:w-2/3 max-w-6xl h-auto object-cover opacity-60 pointer-events-none mix-blend-lighten z-10"
-        />
       </section>
 
       {/* 2. CAROUSEL SECTION */}

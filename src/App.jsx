@@ -7,6 +7,8 @@ import Catalog from './pages/Catalog';
 import ProductDetails from './pages/ProductDetails';
 import Admin from './pages/Admin';
 import Software from './pages/Software';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 import AuthModal from './components/Modals/AuthModal';
 import CartDrawer from './components/Modals/CartDrawer';
 import { AppProvider } from './context/AppContext';
@@ -23,6 +25,8 @@ function App() {
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/software" element={<Software />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
           </Routes>
         </main>
         <Footer />
