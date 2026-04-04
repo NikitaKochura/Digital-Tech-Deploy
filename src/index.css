@@ -1,12 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Benzin';
+  src: url('/fonts/Benzin-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-dark-msh: #080808;
   --color-dark-elevated: #111111;
   --color-dark-glass: rgba(8, 8, 8, 0.65);
   
   --font-sans: 'Outfit', sans-serif;
+  --font-benzin: 'Benzin', sans-serif;
 }
 
 :root {
