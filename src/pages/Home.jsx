@@ -5,53 +5,59 @@ import { ArrowRight, Crosshair, Lightning, ShieldCheck, CaretLeft, CaretRight } 
 
 const SLIDES = [
   {
-    bg: '/images/dt_controller_1775228657441.png',
-    bgStyle: 'bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#111]',
+    bg: '/images/slider_headset.png',
+    text: 'Превосходное\nкачество сборки и\nисключительный\nкомфорт',
+  },
+  {
+    bg: '/images/slider_controller.png',
     text: 'Легкие стики\nмалый вес\nсиликон высокого\nкачества -\nбудущее внутри\nгеймпада',
-    textColor: 'text-white',
-    btnBorder: 'border-white/30 text-white hover:bg-white/10',
-    dotActive: 'bg-blue-500',
-    dotInactive: 'bg-gray-700',
   },
   {
-    bg: '/images/headset_pro_1775225554646.png',
-    bgStyle: 'bg-gradient-to-br from-[#e5e7eb] via-[#d1d5db] to-[#f3f4f6]',
-    text: 'Превосходный\nдизайн и\nисключительный\nкомфорт',
-    textColor: 'text-[#1a1a1a]',
-    btnBorder: 'border-[#1a1a1a]/30 text-[#1a1a1a] hover:bg-black/5',
-    dotActive: 'bg-blue-500',
-    dotInactive: 'bg-gray-400',
-  },
-  {
-    bg: '/images/kb_pro_1775225523116.png',
-    bgStyle: 'bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#0a0a0a]',
+    bg: '/images/slider_keyboard.png',
     text: 'Матовые клавиши\nбесшумные\nмеханические\nкомпоненты -\nидеал для побед',
-    textColor: 'text-white',
-    btnBorder: 'border-white/30 text-white hover:bg-white/10',
-    dotActive: 'bg-blue-500',
-    dotInactive: 'bg-gray-700',
   },
 ];
+
+const variants = {
+  enter: (direction) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction) => ({
+    zIndex: 0,
+    x: direction < 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+};
 
 export default function Home() {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
   const y1 = useTransform(scrollYProgress, [0, 1], [0, 200]);
 
-  const [current, setCurrent] = useState(0);
+  const [page, setPage] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const current = Math.abs(page % SLIDES.length);
 
-  const next = useCallback(() => setCurrent(prev => (prev + 1) % SLIDES.length), []);
-  const prev = useCallback(() => setCurrent(prev => (prev - 1 + SLIDES.length) % SLIDES.length), []);
+  const paginate = useCallback((newDirection) => {
+    setDirection(newDirection);
+    setPage(prev => prev + newDirection);
+  }, []);
 
   useEffect(() => {
-    const timer = setInterval(next, 5000);
+    const timer = setInterval(() => paginate(1), 5000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [paginate]);
 
   const slide = SLIDES[current];
 
   return (
-    <div className="flex flex-col relative w-full bg-[#050505] min-h-screen font-sans" ref={containerRef}>
+    <div className="flex flex-col relative w-full bg-[#050505] min-h-screen font-sans overflow-x-hidden" ref={containerRef}>
       
       {/* 1. HERO SECTION */}
       <section className="relative min-h-[100dvh] flex items-center justify-start bg-[#050505] px-8 md:px-20 pt-20">
@@ -114,42 +120,50 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 2. CAROUSEL SECTION */}
-      <section className="relative z-20 px-0 md:px-0 py-0">
-        <div className={`relative w-full overflow-hidden transition-colors duration-700 ${slide.bgStyle}`} style={{ minHeight: '560px' }}>
-          
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
-              className="absolute inset-0 flex items-center"
-            >
-              {/* Background product image */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <img 
-                  src={slide.bg} 
-                  alt="" 
-                  className="w-full h-full object-contain opacity-80 scale-110 pointer-events-none"
-                  style={{ objectPosition: 'center center' }}
-                />
-              </div>
-              
-              {/* Gradient overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent z-10" />
+      {/* 2. SLIDING CAROUSEL SECTION */}
+      <section className="relative z-20 w-full py-12 md:py-24 flex items-center justify-center min-h-[600px] md:min-h-[800px] bg-[#050505]">
+        
+        {/* Left Arrow (Outside) */}
+        <button 
+          onClick={() => paginate(-1)} 
+          className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors z-30"
+        >
+          <CaretLeft size={48} weight="light" />
+        </button>
 
-              {/* Text content */}
-              <div className="relative z-20 px-10 md:px-20 py-16 max-w-2xl">
+        {/* Carousel Container (Rounded Box) */}
+        <div className="relative w-[85%] max-w-[1600px] h-[500px] md:h-[650px] rounded-[24px] md:rounded-[32px] overflow-hidden bg-[#111] shadow-2xl">
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={page}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 }
+              }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <img 
+                src={slide.bg} 
+                alt="Product Slide" 
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              />
+              
+              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/10 to-transparent pointer-events-none" />
+
+              <div className="relative z-10 w-full h-full flex flex-col justify-center px-8 md:px-24">
                 <h2 
-                  className={`${slide.textColor} mb-8 leading-[1.15] whitespace-pre-line drop-shadow-lg`}
+                  className="text-white mb-10 leading-[1.3] whitespace-pre-line drop-shadow-xl font-medium tracking-wide"
                   style={{ fontFamily: "'Benzin', sans-serif", fontSize: '36px' }}
                 >
                   {slide.text}
                 </h2>
-                <Link to="/catalog">
-                  <button className={`border ${slide.btnBorder} rounded-full px-8 py-3 text-sm transition-colors backdrop-blur-sm`}>
+                <Link to="/catalog" className="w-fit">
+                  <button className="border border-blue-400 text-[#e0e0e0] hover:text-white rounded-full px-8 py-3 text-sm hover:bg-blue-500/20 transition-colors backdrop-blur-md shadow-lg">
                     Показать ещё
                   </button>
                 </Link>
@@ -157,29 +171,34 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation Arrows */}
-          <button onClick={prev} className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors z-30">
-            <CaretLeft size={48} weight="light" />
-          </button>
-          <button onClick={next} className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors z-30">
-            <CaretRight size={48} weight="light" />
-          </button>
-
-          {/* Dots */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
-            {SLIDES.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrent(idx)}
-                className={`w-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  idx === current 
-                    ? `${slide.dotActive} h-5` 
-                    : `${slide.dotInactive} h-3 hover:opacity-70`
-                }`}
-              />
-            ))}
+          {/* Dots Indicator */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
+            {SLIDES.map((_, idx) => {
+              const isActive = idx === current;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setDirection(idx > current ? 1 : -1);
+                    setPage(Math.floor(page / SLIDES.length) * SLIDES.length + idx);
+                  }}
+                  className={`w-1.5 rounded-full transition-all duration-300 ${
+                    isActive ? "bg-blue-500 h-5" : "bg-gray-500 h-3 hover:bg-gray-300"
+                  }`}
+                />
+              );
+            })}
           </div>
         </div>
+
+        {/* Right Arrow (Outside) */}
+        <button 
+          onClick={() => paginate(1)} 
+          className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors z-30"
+        >
+          <CaretRight size={48} weight="light" />
+        </button>
+
       </section>
 
       {/* 3. QUALITY / FEATURES SECTION */}
@@ -232,4 +251,3 @@ export default function Home() {
     </div>
   );
 }
-
