@@ -10,7 +10,7 @@ export default function Catalog() {
   const [category, setCategory] = useState('');
   const [sort, setSort] = useState('newest');
 
-  useEffect(() => { setProducts(getProducts()); }, []);
+  useEffect(() => { getProducts().then(setProducts); }, []);
 
   const filteredProducts = useMemo(() => {
     let result = products;

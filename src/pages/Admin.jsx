@@ -6,7 +6,7 @@ export default function Admin() {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true });
 
-  useEffect(() => { setProducts(getProducts()); }, []);
+  useEffect(() => { getProducts().then(setProducts); }, []);
 
   const handleSave = () => {
     if (!formData.name) return;

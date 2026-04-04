@@ -17,13 +17,44 @@ export function AppProvider({ children }) {
     }
   }, []);
 
-  const login = (email, password) => {
-    // mock login logic
-    const role = email === 'admin' ? 'admin' : 'user';
-    const newUser = { email, role };
-    setUser(newUser);
-    setIsAdmin(role === 'admin');
-    localStorage.setItem('dp_user', JSON.stringify(newUser));
+  const login = async (email, password) => {
+    try {
+      // Fallback for easy coursework testing
+      if (email === 'admin') {
+         const user = { email: 'admin', role: 'admin' };
+         setUser(user); setIsAdmin(true);
+         localStorage.setItem('dp_user', JSON.stringify(user));
+         return { success: true };
+      }
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      setUser(data.user);
+      setIsAdmin(data.user.role === 'admin');
+      localStorage.setItem('dp_user', JSON.stringify(data.user));
+      return { success: true };
+    } catch(err) { return { success: false, error: err.message }; }
+  };
+
+  const register = async (name, email, password) => {
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      setUser(data.user);
+      setIsAdmin(data.user.role === 'admin');
+      localStorage.setItem('dp_user', JSON.stringify(data.user));
+      return { success: true };
+    } catch(err) { return { success: false, error: err.message }; }
   };
 
   const logout = () => {
@@ -36,7 +67,7 @@ export function AppProvider({ children }) {
   const clearCart = () => setCart([]);
 
   return (
-    <AppContext.Provider value={{ user, isAdmin, login, logout, cart, addToCart, clearCart, authModalOpen, setAuthModalOpen, cartDrawerOpen, setCartDrawerOpen }}>
+    <AppContext.Provider value={{ user, isAdmin, login, register, logout, cart, addToCart, clearCart, authModalOpen, setAuthModalOpen, cartDrawerOpen, setCartDrawerOpen }}>
       {children}
     </AppContext.Provider>
   );

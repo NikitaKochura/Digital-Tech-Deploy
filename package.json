@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"nodemon server/server.js\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "serve -s dist -l $PORT"
+    "start": "node server/server.js & serve -s dist -l $PORT"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

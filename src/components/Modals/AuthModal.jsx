@@ -4,7 +4,7 @@ import { X, LockKey, EnvelopeSimple, User as UserIcon } from '@phosphor-icons/re
 import { useAppContext } from '../../context/AppContext';
 
 export default function AuthModal() {
-  const { authModalOpen, setAuthModalOpen, login, user, logout } = useAppContext();
+  const { authModalOpen, setAuthModalOpen, login, register, user, logout } = useAppContext();
   
   const [tab, setTab] = useState('login'); // 'login' | 'register'
   const [step, setStep] = useState('credentials'); // 'credentials' | 'verifying' | 'code' | 'loading_login'
@@ -17,7 +17,7 @@ export default function AuthModal() {
 
   if (!authModalOpen) return null;
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (step === 'credentials') {
       if (!email || !password || (tab === 'register' && !name)) {
         setError('Пожалуйста, заполните все поля');
@@ -25,11 +25,9 @@ export default function AuthModal() {
       }
       if (email === 'admin') {
         setStep('loading_login');
-        setTimeout(() => {
-          login('admin', 'admin123');
-          setAuthModalOpen(false);
-          setStep('credentials');
-        }, 800);
+        await login('admin', 'admin123'); // fallback
+        setAuthModalOpen(false);
+        setStep('credentials');
         return;
       }
       
@@ -47,16 +45,25 @@ export default function AuthModal() {
       
       setError('');
       setStep('loading_login');
-      setTimeout(() => {
-        login(email, password);
-        setAuthModalOpen(false);
+      
+      // Perform actual DB Login / Registration
+      const result = tab === 'login' 
+        ? await login(email, password)
+        : await register(name, email, password);
+        
+      if (!result.success) {
+        setError(result.error);
         setStep('credentials');
-        setTab('login');
-        setName('');
-        setEmail('');
-        setPassword('');
-        setCode('');
-      }, 800);
+        return;
+      }
+
+      setAuthModalOpen(false);
+      setStep('credentials');
+      setTab('login');
+      setName('');
+      setEmail('');
+      setPassword('');
+      setCode('');
     }
   };
 

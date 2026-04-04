@@ -12,11 +12,13 @@ export default function ProductDetails() {
   const { addToCart, setCartDrawerOpen } = useAppContext();
 
   useEffect(() => {
-    const p = getProducts().find(x => x.id === parseInt(id));
-    if (p) {
-      setProduct(p);
-      setMainImage(p.images[0]);
-    }
+    getProducts().then(products => {
+      const p = products.find(x => x.id === parseInt(id));
+      if (p) {
+        setProduct(p);
+        setMainImage(p.images[0]);
+      }
+    });
   }, [id]);
 
   if (!product) return <div className="min-h-screen pt-32 text-center text-gray-500 font-mono tracking-widest uppercase">Загрузка данных...</div>;
