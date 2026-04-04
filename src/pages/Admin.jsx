@@ -1,25 +1,75 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { getProducts, saveProducts, CATEGORIES } from '../data';
+import { useAppContext } from '../context/AppContext';
 
 export default function Admin() {
+  const { isAdmin, setAuthModalOpen } = useAppContext();
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md">
+          <div className="text-6xl mb-6">🔒</div>
+          <h1 className="text-2xl font-bold uppercase tracking-tight mb-4">Доступ запрещен</h1>
+          <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+            Для доступа к терминалу управления необходимо авторизоваться с правами администратора.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <button 
+              onClick={() => setAuthModalOpen(true)}
+              className="bg-white text-black px-8 py-3 text-xs font-bold uppercase tracking-[0.2em] hover:bg-gray-200 transition-colors"
+            >
+              Войти
+            </button>
+            <Link to="/" className="border border-white/20 px-8 py-3 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white hover:border-white/40 transition-colors">
+              На главную
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
   const [products, setProducts] = useState([]);
-  const [formData, setFormData] = useState({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true });
+  const [formData, setFormData] = useState({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true, images: [] });
 
   useEffect(() => { getProducts().then(setProducts); }, []);
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    Promise.all(files.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    })).then(base64Images => {
+       setFormData(prev => ({ ...prev, images: [...(prev.images || []), ...base64Images] }));
+    });
+  };
+
+  const removeImage = (index) => {
+     setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+  };
 
   const handleSave = () => {
     if (!formData.name) return;
     let result = [...products];
+    const finalImages = formData.images && formData.images.length > 0 
+      ? formData.images 
+      : [`https://picsum.photos/seed/dp${Date.now()}/800/600`];
+
     if (formData.id) {
-       result = result.map(p => p.id === formData.id ? { ...formData, price: Number(formData.price), specs: p.specs, images: p.images } : p);
+       result = result.map(p => p.id === formData.id ? { ...formData, price: Number(formData.price), specs: p.specs, images: finalImages } : p);
     } else {
-       const newProduct = { ...formData, id: Date.now(), price: Number(formData.price), specs: {}, images: [`https://picsum.photos/seed/dp${Date.now()}/800/600`] };
+       const newProduct = { ...formData, id: Date.now(), price: Number(formData.price), specs: {}, images: finalImages };
        result.push(newProduct);
     }
     setProducts(result);
     saveProducts(result);
-    setFormData({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true });
+    setFormData({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true, images: [] });
   };
 
   const handleDelete = (id) => {
@@ -29,7 +79,7 @@ export default function Admin() {
   };
 
   const startEdit = (p) => {
-    setFormData({ id: p.id, name: p.name, category: p.category, brand: p.brand, price: p.price, description: p.description, inStock: p.inStock });
+    setFormData({ id: p.id, name: p.name, category: p.category, brand: p.brand, price: p.price, description: p.description, inStock: !!p.inStock, images: p.images || [] });
   };
 
   return (
@@ -69,6 +119,33 @@ export default function Admin() {
             </div>
 
             <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-gray-500 mb-2">Фотографии (Главная + Доп.)</label>
+              <input 
+                type="file" 
+                multiple 
+                accept="image/*" 
+                onChange={handleImageUpload} 
+                className="w-full bg-[#111] border border-white/5 p-2 text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:text-[10px] file:font-bold file:uppercase file:bg-white/10 file:text-white hover:file:bg-white/20 transition-all outline-none" 
+              />
+              {formData.images && formData.images.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {formData.images.map((img, idx) => (
+                    <div key={idx} className="relative group w-16 h-16 rounded border border-white/10 overflow-hidden">
+                      <img src={img} alt="upload" className="w-full h-full object-cover" />
+                      <button 
+                        onClick={() => removeImage(idx)}
+                        className="absolute inset-0 bg-red-600/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold"
+                      >
+                        X
+                      </button>
+                      {idx === 0 && <span className="absolute bottom-0 left-0 right-0 bg-black/70 text-[8px] text-center text-white py-0.5 font-bold uppercase">Main</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] text-gray-500 mb-2">Описание</label>
               <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-[#111] border border-white/5 p-4 text-sm text-white resize-none h-24 focus:border-white outline-none leading-relaxed" />
             </div>
@@ -79,7 +156,7 @@ export default function Admin() {
             </div>
             
             <div className="flex items-center pt-2 pb-6 border-b border-white/5">
-              <input type="checkbox" checked={formData.inStock} onChange={e => setFormData({...formData, inStock: e.target.checked})} id="inStock" className="w-4 h-4 mr-3 bg-[#111] border-white/10" />
+              <input type="checkbox" checked={formData.inStock} onChange={e => setFormData({...formData, inStock: e.target.checked})} id="inStock" className="w-4 h-4 mr-3 bg-red-500 appearance-none checked:bg-red-500 border border-white/10 relative after:content-[''] after:absolute after:hidden checked:after:block after:left-[4px] after:top-[1px] after:w-[6px] after:h-[10px] after:border-r-2 after:border-b-2 after:border-white after:rotate-45" />
               <label htmlFor="inStock" className="text-xs font-bold uppercase tracking-[0.1em] text-gray-400 cursor-pointer hover:text-white transition-colors">Товар в наличии</label>
             </div>
             
@@ -92,7 +169,7 @@ export default function Admin() {
             </motion.button>
             {formData.id && (
               <button 
-                onClick={() => setFormData({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true })} 
+                onClick={() => setFormData({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true, images: [] })} 
                 className="w-full border border-white/10 text-gray-400 py-3 text-xs font-bold uppercase tracking-[0.2em] mt-3 hover:text-white hover:border-white/30 transition-colors"
               >
                 Отмена
@@ -108,6 +185,7 @@ export default function Admin() {
           <table className="w-full text-left whitespace-nowrap min-w-[700px]">
             <thead className="border-b border-white/10">
               <tr>
+                <th className="p-6 text-[10px] tracking-[0.2em] font-bold uppercase text-gray-500 w-16">Фото</th>
                 <th className="p-6 text-[10px] tracking-[0.2em] font-bold uppercase text-gray-500 w-16">ID</th>
                 <th className="p-6 text-[10px] tracking-[0.2em] font-bold uppercase text-gray-500">Товар</th>
                 <th className="p-6 text-[10px] tracking-[0.2em] font-bold uppercase text-gray-500 w-32">Цена</th>
@@ -123,6 +201,15 @@ export default function Admin() {
                     key={p.id} 
                     className="border-b border-white/5 hover:bg-[#111] transition-colors group"
                   >
+                    <td className="p-6">
+                      {p.images && p.images[0] ? (
+                        <div className="w-10 h-10 rounded overflow-hidden border border-white/10">
+                          <img src={p.images[0]} alt="product" className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-white/5 border border-white/10"></div>
+                      )}
+                    </td>
                     <td className="p-6 text-gray-600 font-mono text-xs">{p.id.toString().slice(-4)}</td>
                     <td className="p-6">
                       <div className="font-medium text-gray-200">{p.name}</div>

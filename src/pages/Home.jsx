@@ -50,24 +50,25 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            <Link to="/catalog" className="inline-flex items-center justify-center bg-white text-black px-8 py-4 uppercase tracking-[0.2em] text-[10px] font-bold hover:bg-gray-200 transition-colors">
+            <Link to="/catalog" className="inline-flex items-center justify-center bg-white text-black px-8 py-4 uppercase tracking-[0.2em] text-[10px] font-bold hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] group">
               Каталог
-              <ArrowRight size={16} weight="bold" className="ml-3" />
+              <ArrowRight size={16} weight="bold" className="ml-3 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
         </motion.div>
 
-        {/* Hero Image (Keyboard) */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, delay: 0.3 }}
-          className="relative z-10 w-full md:w-1/2 h-[500px] md:h-[700px] mt-12 md:mt-0 flex items-center justify-center lg:justify-end"
-        >
-          {/* We use a soft gradient or the actual image placeholder */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#050505]/50 to-transparent z-10" />
-          <img src="/images/logitech_kb_1775229167209.png" alt="Keyboard" className="w-[120%] max-w-[1200px] h-auto object-contain opacity-90 mix-blend-lighten transform translate-x-[10%] rotate-[-5deg]" />
-        </motion.div>
+        {/* Hero Video Background */}
+        <motion.video 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          src="/hero.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-3/4 lg:w-2/3 max-w-6xl h-auto object-cover opacity-60 pointer-events-none mix-blend-lighten z-10"
+        />
       </section>
 
       {/* 2. CAROUSEL SECTION */}
