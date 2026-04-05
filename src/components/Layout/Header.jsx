@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MagnifyingGlass, User, ShoppingBag, List, X } from '@phosphor-icons/react';
 import { useAppContext } from '../../context/AppContext';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { setAuthModalOpen, setCartDrawerOpen, cart, isAdmin } = useAppContext();
+  const { setAuthModalOpen, setCartDrawerOpen, cart, isAdmin, user } = useAppContext();
+  const navigate = useNavigate();
 
   return (
     <motion.header 
@@ -31,7 +32,10 @@ export default function Header() {
 
       <div className="flex items-center space-x-6 text-gray-400">
         <button className="hover:text-white transition-colors active:scale-95"><MagnifyingGlass size={20} weight="bold" /></button>
-        <button onClick={() => setAuthModalOpen(true)} className="hover:text-white transition-colors active:scale-95"><User size={20} weight="bold" /></button>
+        <button onClick={() => user && user.id ? navigate('/profile') : setAuthModalOpen(true)} className="hover:text-white transition-colors active:scale-95 relative">
+          <User size={20} weight="bold" />
+          {user && user.id && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-green-500" />}
+        </button>
         <button onClick={() => setCartDrawerOpen(true)} className="hover:text-white transition-colors active:scale-95 relative">
           <ShoppingBag size={20} weight="bold" />
           {cart.length > 0 && (
@@ -52,7 +56,8 @@ export default function Header() {
               { name: 'Главная', path: '/' },
               { name: 'Каталог устройств', path: '/catalog' },
               { name: 'Центр загрузки ПО', path: '/software' },
-              ...(isAdmin ? [{ name: 'Терминал (Админ)', path: '/admin' }] : [])
+              ...(isAdmin ? [{ name: 'Терминал (Админ)', path: '/admin' }] : []),
+              ...(user && user.id ? [{ name: 'Мой профиль', path: '/profile' }] : [])
             ].map((item, i) => (
               <motion.div key={item.name} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.1, type: "spring", stiffness: 100 }}>
                 <Link to={item.path} onClick={() => setMenuOpen(false)} className="text-3xl font-bold tracking-tighter hover:text-gray-400 transition-colors block">

@@ -15,6 +15,19 @@ app.use(express.json({ limit: '50mb' }));
 
 const JWT_SECRET = 'digital-tech-coursework-secret';
 
+// --- AUTH MIDDLEWARE ---
+const authMiddleware = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Необходима авторизация' });
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Недействительный токен' });
+  }
+};
+
 // User Analytics Tracking Middleware
 app.use(async (req, res, next) => {
   if (req.method === 'GET' && req.path === '/api/products') {
@@ -32,8 +45,8 @@ app.post('/api/auth/register', async (req, res) => {
   try {
     const hashed = await bcrypt.hash(password, 10);
     const result = await dbRun('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hashed]);
-    const token = jwt.sign({ id: result.lastID, email, name }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: result.lastID, name, email } });
+    const token = jwt.sign({ id: result.lastID, email, name, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: result.lastID, name, email, role: 'user' } });
   } catch (err) {
     if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'Пользователь уже существует' });
     res.status(500).json({ error: err.message });
@@ -132,7 +145,7 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
-// LEGACY sync endpoint (kept for backward compat but not recommended)
+// LEGACY sync endpoint
 app.post('/api/products/sync', async (req, res) => {
   const products = req.body;
   try {
@@ -145,6 +158,57 @@ app.post('/api/products/sync', async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- ORDERS API ---
+
+// POST — create order (requires auth)
+app.post('/api/orders', authMiddleware, async (req, res) => {
+  const { items, total, delivery_type, delivery_address, pickup_point, customer_name, customer_phone } = req.body;
+  
+  // Validation
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'Корзина пуста' });
+  }
+  if (!delivery_type || !['pickup', 'courier'].includes(delivery_type)) {
+    return res.status(400).json({ error: 'Выберите способ доставки' });
+  }
+  if (!customer_name || customer_name.trim().length < 2) {
+    return res.status(400).json({ error: 'Введите ФИО (минимум 2 символа)' });
+  }
+  if (!customer_phone || !/^\+?\d{10,12}$/.test(customer_phone.replace(/[\s\-()]/g, ''))) {
+    return res.status(400).json({ error: 'Введите корректный номер телефона' });
+  }
+  if (delivery_type === 'courier' && (!delivery_address || delivery_address.trim().length < 5)) {
+    return res.status(400).json({ error: 'Введите адрес доставки (минимум 5 символов)' });
+  }
+  if (delivery_type === 'pickup' && !pickup_point) {
+    return res.status(400).json({ error: 'Выберите пункт выдачи' });
+  }
+
+  try {
+    const result = await dbRun(
+      `INSERT INTO orders (user_id, items, total, delivery_type, delivery_address, pickup_point, customer_name, customer_phone) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.user.id, JSON.stringify(items), total, delivery_type, delivery_address || null, pickup_point || null, customer_name, customer_phone]
+    );
+    res.json({ success: true, orderId: result.lastID });
+  } catch(err) {
+    console.error('POST /api/orders error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET — user's orders (requires auth)
+app.get('/api/orders', authMiddleware, async (req, res) => {
+  try {
+    const rows = await dbQuery('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [req.user.id]);
+    const parsed = rows.map(r => ({
+      ...r,
+      items: JSON.parse(r.items || '[]')
+    }));
+    res.json(parsed);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 // Analytics
 app.get('/api/admin/analytics', async (req, res) => {
   try {
@@ -154,11 +218,10 @@ app.get('/api/admin/analytics', async (req, res) => {
 });
 
 // --- SERVE STATIC FRONTEND (PRODUCTION) ---
-// In production, Express serves the Vite-built dist folder
 const distPath = path.resolve(__dirname, '..', 'dist');
 app.use(express.static(distPath));
 
-// SPA fallback — all non-API routes return index.html
+// SPA fallback
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(distPath, 'index.html'));

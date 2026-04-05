@@ -21,6 +21,8 @@ db.serialize(() => {
     name TEXT,
     email TEXT UNIQUE,
     password TEXT,
+    phone TEXT DEFAULT '',
+    address TEXT DEFAULT '',
     role TEXT DEFAULT 'user',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
@@ -38,6 +40,22 @@ db.serialize(() => {
     images TEXT
   )`);
 
+  // Orders table
+  db.run(`CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    items TEXT NOT NULL,
+    total REAL NOT NULL,
+    delivery_type TEXT NOT NULL,
+    delivery_address TEXT,
+    pickup_point TEXT,
+    customer_name TEXT,
+    customer_phone TEXT,
+    status TEXT DEFAULT 'Оформлен',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )`);
+
   // Visitors table
   db.run(`CREATE TABLE IF NOT EXISTS visitors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,8 +63,6 @@ db.serialize(() => {
     user_agent TEXT,
     visited_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-
-  // Removed initial seed logic because user starts with an empty db manually
 });
 
 export const dbQuery = (query, params = []) => {

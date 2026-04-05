@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Catalog from './pages/Catalog';
 import ProductDetails from './pages/ProductDetails';
 import Admin from './pages/Admin';
+import Profile from './pages/Profile';
 import Software from './pages/Software';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
@@ -24,6 +25,7 @@ function App() {
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/software" element={<Software />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
