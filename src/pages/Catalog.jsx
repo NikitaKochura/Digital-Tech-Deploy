@@ -23,31 +23,31 @@ export default function Catalog() {
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 pb-20 pt-32 min-h-[100dvh]">
-      <motion.div 
+      <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8"
       >
         <div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tighter mb-4">Оборудование.</h1>
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tighter mb-4">Оборудование</h1>
           <p className="text-gray-400 max-w-md text-sm leading-relaxed">Высокоточные инструменты для достижения абсолютного превосходства.</p>
         </div>
-        
+
         <div className="flex bg-[#111] p-1 border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] rounded-sm h-12 w-full md:w-96 relative">
           <MagnifyingGlass size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input 
-            type="text" 
-            placeholder="Поиск по арсеналу..." 
+          <input
+            type="text"
+            placeholder="Поиск по арсеналу..."
             className="w-full bg-transparent pl-12 pr-4 text-sm focus:outline-none text-white placeholder:text-gray-600"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
       </motion.div>
-      
+
       <div className="flex flex-col lg:flex-row gap-12">
-        <motion.div 
+        <motion.div
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.1, type: "spring", stiffness: 100 }}
@@ -64,11 +64,11 @@ export default function Catalog() {
               ))}
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-5">Сортировка</h3>
-            <select 
-              value={sort} 
+            <select
+              value={sort}
               onChange={e => setSort(e.target.value)}
               className="w-full bg-[#111] border border-white/5 p-3 text-sm text-gray-300 outline-none appearance-none cursor-pointer"
             >
@@ -78,8 +78,8 @@ export default function Catalog() {
             </select>
           </div>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           layout
           className="flex-grow grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
         >
@@ -95,10 +95,10 @@ export default function Catalog() {
               >
                 <Link to={`/product/${p.id}`} className="group block h-full bg-[#111] hover:bg-[#161616] p-6 border border-white/5 hover:border-white/20 transition-all duration-500">
                   <div className="relative aspect-square mix-blend-lighten overflow-hidden mb-8">
-                    <motion.img 
+                    <motion.img
                       whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.7, ease: "easeOut" }}
-                      src={p.images[0]} alt={p.name} className="w-full h-full object-contain grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" 
+                      src={p.images[0]} alt={p.name} className="w-full h-full object-contain grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
                     />
                     {!p.inStock && (
                       <div className="absolute top-0 right-0 bg-white text-black text-[10px] px-2 py-1 font-bold tracking-widest uppercase">Sold Out</div>

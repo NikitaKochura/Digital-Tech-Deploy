@@ -59,7 +59,7 @@ export default function Home() {
   return (
     <div className="flex flex-col relative w-full bg-[#050505] min-h-screen font-sans overflow-x-hidden" ref={containerRef}>
 
-      {/* 1. HERO SECTION */}
+      {/* 1. Блок-видос и Hero */}
       <section className="relative min-h-[100dvh] flex items-center justify-start bg-[#050505] px-8 md:px-20 pt-20">
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10 w-full" />
 
@@ -120,10 +120,10 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 2. SLIDING CAROUSEL SECTION */}
+      {/* 2. Блок-карусель*/}
       <section className="relative z-20 w-full py-12 md:py-24 flex items-center justify-center min-h-[600px] md:min-h-[800px] bg-[#050505]">
 
-        {/* Left Arrow (Outside) */}
+        {/* Левая стрелка */}
         <button
           onClick={() => paginate(-1)}
           className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors z-30"
@@ -131,7 +131,7 @@ export default function Home() {
           <CaretLeft size={48} weight="light" />
         </button>
 
-        {/* Carousel Container (Rounded Box) */}
+        {/* Карусель */}
         <div className="relative w-[85%] max-w-[1600px] h-[500px] md:h-[650px] rounded-[24px] md:rounded-[32px] overflow-hidden bg-[#111] shadow-2xl">
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
@@ -171,7 +171,7 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Dots Indicator */}
+          {/* Средние кнопки карусель */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
             {SLIDES.map((_, idx) => {
               const isActive = idx === current;
@@ -190,7 +190,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right Arrow (Outside) */}
+        {/* Правая стрелка */}
         <button
           onClick={() => paginate(1)}
           className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors z-30"
@@ -200,7 +200,7 @@ export default function Home() {
 
       </section>
 
-      {/* 3. QUALITY / FEATURES SECTION */}
+      {/* 3.Блок - качество*/}
       <section className="relative z-20 px-8 md:px-20 py-24 max-w-[1600px] mx-auto w-full">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -218,7 +218,7 @@ export default function Home() {
           >
             <Crosshair size={32} className="text-white mb-auto" weight="regular" />
             <div>
-              <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">ХИРУРГИЧЕСКАЯ ТОЧНОСТЬ</h3>
+              <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">ТОЧНОСТЬ</h3>
               <p className="text-gray-500 text-sm leading-relaxed">Оптические сенсоры последнего поколения гарантируют регистрацию каждого миллиметра.</p>
             </div>
           </motion.div>
@@ -229,7 +229,7 @@ export default function Home() {
           >
             <Lightning size={32} className="text-white mb-auto" weight="regular" />
             <div>
-              <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">МОЛНИЕНОСНЫЙ ОТКЛИК</h3>
+              <h3 className="text-lg md:text-xl font-bold mb-4 tracking-tight text-white uppercase">ОТКЛИК</h3>
               <p className="text-gray-500 text-sm leading-relaxed">Собственные переключатели с ходом до срабатывания в 1мм обеспечивают минимально возможную задержку.</p>
             </div>
           </motion.div>
