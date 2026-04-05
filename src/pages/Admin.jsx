@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { getProducts, saveProducts, CATEGORIES } from '../data';
+import { getProducts, addProduct, updateProduct, deleteProduct, CATEGORIES } from '../data';
 import { useAppContext } from '../context/AppContext';
 
 export default function Admin() {
@@ -53,28 +53,44 @@ export default function Admin() {
     setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name) return;
-    let result = [...products];
     const finalImages = formData.images && formData.images.length > 0
       ? formData.images
       : [`https://picsum.photos/seed/dp${Date.now()}/800/600`];
 
+    const productData = {
+      name: formData.name,
+      category: formData.category,
+      brand: formData.brand,
+      price: Number(formData.price) || 0,
+      description: formData.description,
+      inStock: formData.inStock,
+      specs: formData.specs || {},
+      images: finalImages,
+    };
+
     if (formData.id) {
-      result = result.map(p => p.id === formData.id ? { ...formData, price: Number(formData.price), specs: p.specs, images: finalImages } : p);
+      // UPDATE existing product
+      const result = await updateProduct(formData.id, productData);
+      if (result) {
+        setProducts(prev => prev.map(p => p.id === formData.id ? { ...productData, id: formData.id } : p));
+      }
     } else {
-      const newProduct = { ...formData, id: Date.now(), price: Number(formData.price), specs: {}, images: finalImages };
-      result.push(newProduct);
+      // ADD new product
+      const result = await addProduct(productData);
+      if (result && result.id) {
+        setProducts(prev => [{ ...productData, id: result.id }, ...prev]);
+      }
     }
-    setProducts(result);
-    saveProducts(result);
     setFormData({ id: '', name: '', category: CATEGORIES[0], brand: '', price: '', description: '', inStock: true, images: [] });
   };
 
-  const handleDelete = (id) => {
-    const result = products.filter(p => p.id !== id);
-    setProducts(result);
-    saveProducts(result);
+  const handleDelete = async (id) => {
+    const result = await deleteProduct(id);
+    if (result) {
+      setProducts(prev => prev.filter(p => p.id !== id));
+    }
   };
 
   const startEdit = (p) => {

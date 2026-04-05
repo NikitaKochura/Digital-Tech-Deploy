@@ -2,19 +2,26 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { dbQuery, dbRun } from './db.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
 
 const JWT_SECRET = 'digital-tech-coursework-secret';
 
-// User Analytics Tracking Middleware (For "перешедшие" users)
+// User Analytics Tracking Middleware
 app.use(async (req, res, next) => {
   if (req.method === 'GET' && req.path === '/api/products') {
      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-     await dbRun(`INSERT INTO visitors (ip, user_agent) VALUES (?, ?)`, [ip, req.headers['user-agent']]);
+     try {
+       await dbRun(`INSERT INTO visitors (ip, user_agent) VALUES (?, ?)`, [ip, req.headers['user-agent']]);
+     } catch(e) { /* ignore analytics errors */ }
   }
   next();
 });
@@ -51,10 +58,11 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // --- PRODUCTS API ---
+
+// GET all products
 app.get('/api/products', async (req, res) => {
   try {
-    const rows = await dbQuery('SELECT * FROM products');
-    // Decode JSON strings for frontend usage
+    const rows = await dbQuery('SELECT * FROM products ORDER BY id DESC');
     const parsed = rows.map(r => ({
       ...r, 
       inStock: Boolean(r.inStock),
@@ -65,20 +73,79 @@ app.get('/api/products', async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// Admin endpoint to sync/override DB array efficiently
+// GET single product
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const rows = await dbQuery('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Товар не найден' });
+    const r = rows[0];
+    res.json({
+      ...r,
+      inStock: Boolean(r.inStock),
+      specs: JSON.parse(r.specs || '{}'),
+      images: JSON.parse(r.images || '[]')
+    });
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST — add single product
+app.post('/api/products', async (req, res) => {
+  const p = req.body;
+  try {
+    const result = await dbRun(
+      `INSERT INTO products (name, category, brand, price, description, inStock, specs, images) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [p.name, p.category, p.brand, Number(p.price) || 0, p.description, p.inStock ? 1 : 0, 
+       JSON.stringify(p.specs || {}), JSON.stringify(p.images || [])]
+    );
+    res.json({ success: true, id: result.lastID });
+  } catch(err) { 
+    console.error('POST /api/products error:', err);
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
+// PUT — update single product
+app.put('/api/products/:id', async (req, res) => {
+  const p = req.body;
+  try {
+    await dbRun(
+      `UPDATE products SET name=?, category=?, brand=?, price=?, description=?, inStock=?, specs=?, images=? WHERE id=?`,
+      [p.name, p.category, p.brand, Number(p.price) || 0, p.description, p.inStock ? 1 : 0,
+       JSON.stringify(p.specs || {}), JSON.stringify(p.images || []), req.params.id]
+    );
+    res.json({ success: true });
+  } catch(err) { 
+    console.error('PUT /api/products/:id error:', err);
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
+// DELETE — remove single product
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    await dbRun('DELETE FROM products WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch(err) { 
+    console.error('DELETE /api/products/:id error:', err);
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
+// LEGACY sync endpoint (kept for backward compat but not recommended)
 app.post('/api/products/sync', async (req, res) => {
   const products = req.body;
   try {
     await dbRun('DELETE FROM products');
-    const stmt = "INSERT INTO products (id, name, category, brand, price, description, inStock, specs, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const stmt = "INSERT INTO products (name, category, brand, price, description, inStock, specs, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     for (const p of products) {
-       await dbRun(stmt, [p.id, p.name, p.category, p.brand, Number(p.price) || 0, p.description, p.inStock ? 1 : 0, JSON.stringify(p.specs), JSON.stringify(p.images)]);
+       await dbRun(stmt, [p.name, p.category, p.brand, Number(p.price) || 0, p.description, p.inStock ? 1 : 0, JSON.stringify(p.specs || {}), JSON.stringify(p.images || [])]);
     }
     res.json({ success: true });
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
-// Analytics (For coursework stats)
+// Analytics
 app.get('/api/admin/analytics', async (req, res) => {
   try {
     const visitors = await dbQuery('SELECT * FROM visitors ORDER BY visited_at DESC');
@@ -86,5 +153,17 @@ app.get('/api/admin/analytics', async (req, res) => {
   } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// --- SERVE STATIC FRONTEND (PRODUCTION) ---
+// In production, Express serves the Vite-built dist folder
+const distPath = path.resolve(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+
+// SPA fallback — all non-API routes return index.html
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(distPath, 'index.html'));
+  }
+});
+
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`🚀 Backend Express API starts on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Backend + Static on http://localhost:${PORT}`));
